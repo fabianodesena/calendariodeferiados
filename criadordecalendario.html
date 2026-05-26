@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sólides - Calendário de Feriados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuração de cores e fontes baseadas no Brand Book da Sólides -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        solides: {
+                            purple: '#80297d',        /* Roxo Sólides (Principal) */
+                            purpleDark: '#3D1A4F',    /* Roxo Solução */
+                            purpleVibrant: '#D51BED', /* Roxo Liderança */
+                            purpleLight: '#DB60EC',   /* Roxo Dev */
+                            red: '#CA2037',           /* Vermelho Executor */
+                            yellow: '#FFBA00',        /* Amarelo Comunicador */
+                            green: '#00A760',         /* Verde Planejador */
+                            blue: '#2657ED',          /* Azul Analista */
+                            light: '#F8F9FA',         /* Fundo claro genérico */
+                        }
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        redhat: ['"Red Hat Display"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Importação das Fontes Oficiais da Sólides -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Red+Hat+Display:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Ícones Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* Customizações extras de scrollbar para a lista de feriados */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d8b4e2; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #80297d; }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Detalhe de estilo fluido ("gotinha" Sólides) */
+        .solides-curve {
+            border-radius: 24px 24px 24px 4px;
+        }
+    </style>
+</head>
+<body class="bg-solides-light text-gray-800 font-redhat min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <!-- Banner de Aviso de Uso Interno -->
+    <div id="internalWarning" class="max-w-4xl w-full mb-6 bg-red-50 border-l-4 border-solides-red text-solides-red p-4 rounded-r-xl shadow-sm flex items-start sm:items-center justify-between gap-4 animate-fade-in relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-solides-red opacity-10 rounded-full blur-xl"></div>
+        <div class="flex items-start sm:items-center gap-3 relative z-10">
+            <i class="ph-fill ph-warning-octagon text-3xl mt-1 sm:mt-0"></i>
+            <div>
+                <p class="font-bold font-poppins text-sm uppercase tracking-wider mb-0.5">Aviso Importante: Uso Interno</p>
+                <p class="text-sm font-medium text-red-900">Esta ferramenta é de <strong>uso exclusivamente interno</strong>. Não envie este link ou arquivo para o cliente.</p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('internalWarning').style.display='none'" class="text-solides-red hover:text-red-900 hover:bg-red-100 p-2 rounded-lg transition-colors relative z-10" title="Fechar aviso">
+            <i class="ph-bold ph-x text-lg"></i>
+        </button>
+    </div>
+
+    <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-solides-purple text-white p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between relative overflow-hidden">
+            <!-- Elementos gráficos de fundo inspirados nas curvas da Sólides -->
+            <div class="absolute -right-10 -top-10 w-48 h-48 bg-solides-purpleVibrant opacity-20 rounded-full blur-2xl"></div>
+            <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-solides-purpleDark opacity-30 rounded-full blur-2xl"></div>
+
+            <div class="relative z-10">
+                <h1 class="text-3xl font-poppins font-bold flex items-center gap-3">
+                    <i class="ph ph-calendar-plus text-white text-4xl"></i>
+                    Novo Calendário
+                </h1>
+                <p class="text-purple-100 text-sm mt-1 font-redhat font-medium tracking-wide">Integração Sólides</p>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-10 flex flex-col md:flex-row gap-10">
+            
+            <!-- Formulário Principal -->
+            <div class="flex-1 space-y-8">
+                
+                <!-- Autenticação -->
+                <section class="bg-purple-50/50 p-5 rounded-2xl border border-purple-100">
+                    <h2 class="text-sm font-poppins font-semibold text-solides-purpleDark uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-lock-key text-solides-purpleDark"></i> Autenticação*
+                    </h2>
+                    <div>
+                        <label for="authToken" class="block text-sm font-medium text-gray-700 mb-1">Token de Autorização (Basic)</label>
+                        <input type="text" id="authToken" placeholder="Ex: Basic XXXXXXX" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-solides-purple focus:border-solides-purple outline-none transition-all text-sm shadow-sm">
+                        <p class="text-xs text-gray-500 mt-2 font-medium">Insira o valor completo do header Authorization. Ele está em Empregador > Integrações</p>
+                    </div>
+                </section>
+
+                <!-- Dados do Calendário -->
+                <section>
+                    <h2 class="text-sm font-poppins font-semibold text-solides-purpleDark uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-info text-solides-purpleDark"></i> Dados do Calendário
+                    </h2>
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="md:col-span-2">
+                                <label for="calName" class="block text-sm font-medium text-gray-700 mb-1">Nome do Calendário</label>
+                                <input type="text" id="calName" placeholder="Ex: Calendário 2024" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-solides-purple focus:border-solides-purple outline-none transition-all text-sm shadow-sm">
+                            </div>
+                            <div>
+                                <label for="calYear" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+                                <input type="number" id="calYear" value="2024" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-solides-purple focus:border-solides-purple outline-none transition-all text-sm shadow-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="calDescription" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                            <input type="text" id="calDescription" placeholder="Ex: Calendário oficial da empresa para 2024" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-solides-purple focus:border-solides-purple outline-none transition-all text-sm shadow-sm">
+                        </div>
+
+                        <div class="flex items-center gap-3 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <input type="checkbox" id="importFixed" class="w-5 h-5 text-solides-purple focus:ring-solides-purple border-gray-300 rounded cursor-pointer accent-solides-purple">
+                            <label for="importFixed" class="text-sm text-gray-700 cursor-pointer font-medium">Importar Feriados Fixos Brasileiros</label>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Gerenciamento de Feriados -->
+            <div class="flex-1 flex flex-col h-full border-t md:border-t-0 md:border-l border-gray-100 pt-8 md:pt-0 md:pl-10">
+                <h2 class="text-sm font-poppins font-semibold text-solides-purpleDark uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="ph-fill ph-calendar-star text-solides-purpleDark"></i> Inserir Feriados
+                </h2>
+
+                <div class="bg-solides-purpleDark/5 p-5 rounded-2xl border border-solides-purple/10 mb-6 solids-curve">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="holDescription" class="block text-xs font-bold text-solides-purpleDark mb-1">Descrição do Feriado</label>
+                            <input type="text" id="holDescription" placeholder="Ex: Ano Novo" 
+                                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-solides-purple outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label for="holDate" class="block text-xs font-bold text-solides-purpleDark mb-1">Data</label>
+                            <input type="date" id="holDate" 
+                                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-solides-purple outline-none shadow-sm text-gray-600">
+                        </div>
+                    </div>
+                    <button id="btnAddHoliday" class="w-full bg-white border-2 border-solides-purple text-solides-purple hover:bg-solides-purple hover:text-white transition-colors font-poppins font-semibold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-lg"></i> Adicionar à Lista
+                    </button>
+                </div>
+
+                <!-- Lista de Feriados -->
+                <div class="flex-1 min-h-[250px] flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm font-poppins font-semibold text-gray-700">Feriados Adicionados:</span>
+                        <span id="holidayCount" class="bg-solides-purple text-white text-xs py-1 px-3 rounded-full font-bold shadow-sm">0</span>
+                    </div>
+                    
+                    <ul id="holidaysList" class="flex-1 overflow-y-auto custom-scrollbar rounded-xl space-y-3 pr-2">
+                        <!-- Itens vazios -->
+                        <li id="emptyState" class="text-center text-gray-400 text-sm py-12 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <i class="ph-duotone ph-calendar-blank text-5xl mb-3 text-gray-300"></i>
+                            <span class="font-medium">Nenhum feriado adicionado ainda.</span>
+                        </li>
+                        <!-- Itens renderizados via JS entrarão aqui -->
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer / Ação -->
+        <div class="bg-gray-50/80 p-6 md:p-8 border-t border-gray-100 flex items-center justify-between flex-col md:flex-row gap-5">
+            
+            <div id="feedbackMessage" class="hidden flex-1 rounded-xl p-4 text-sm font-medium flex items-center gap-3 w-full md:w-auto">
+                <!-- Mensagem de sucesso ou erro -->
+            </div>
+
+            <button id="btnSubmit" class="w-full md:w-auto bg-solides-purple hover:bg-solides-purpleDark text-white font-poppins font-semibold py-4 px-10 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 solides-curve ml-auto">
+                <span id="btnText">Criar Calendário na API</span>
+                <div id="btnSpinner" class="spinner"></div>
+                <i id="btnIcon" class="ph-bold ph-paper-plane-right text-xl text-solides-white"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Script de Lógica -->
+    <script>
+        // Estado da aplicação
+        let holidaysArray = [];
+
+        // Elementos do DOM
+        const elHolidaysList = document.getElementById('holidaysList');
+        const elEmptyState = document.getElementById('emptyState');
+        const elHolidayCount = document.getElementById('holidayCount');
+        const elHolDescription = document.getElementById('holDescription');
+        const elHolDate = document.getElementById('holDate');
+        const btnAddHoliday = document.getElementById('btnAddHoliday');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+
+        // Renderizar a lista de feriados
+        function renderHolidays() {
+            elHolidaysList.innerHTML = '';
+
+            if (holidaysArray.length === 0) {
+                elHolidaysList.appendChild(elEmptyState);
+                elEmptyState.style.display = 'flex';
+            } else {
+                elEmptyState.style.display = 'none';
+                
+                holidaysArray.forEach((holiday, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow animate-fade-in group';
+                    
+                    // Formatando a data
+                    const [year, month, day] = holiday.date.split('-');
+                    const formattedDate = `${day}/${month}/${year}`;
+
+                    li.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="bg-purple-50 text-solides-purple p-2.5 rounded-lg group-hover:bg-solides-purple group-hover:text-white transition-colors">
+                                <i class="ph-fill ph-calendar-check text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-poppins font-semibold text-solides-purpleDark">${holiday.description}</p>
+                                <p class="text-xs text-gray-500 mt-0.5 font-medium">${formattedDate}</p>
+                            </div>
+                        </div>
+                        <button onclick="removeHoliday(${index})" class="text-gray-300 hover:text-solides-red hover:bg-red-50 rounded-lg p-2 transition-all" title="Remover feriado">
+                            <i class="ph-bold ph-trash text-lg"></i>
+                        </button>
+                    `;
+                    elHolidaysList.appendChild(li);
+                });
+            }
+
+            elHolidayCount.innerText = holidaysArray.length;
+        }
+
+        // Adicionar feriado à lista
+        btnAddHoliday.addEventListener('click', () => {
+            const description = elHolDescription.value.trim();
+            const date = elHolDate.value;
+
+            if (!description || !date) {
+                showFeedback('Preencha a descrição e a data do feriado antes de adicionar.', 'error');
+                return;
+            }
+
+            holidaysArray.push({ description, date });
+            
+            elHolDescription.value = '';
+            elHolDate.value = '';
+            elHolDescription.focus();
+
+            renderHolidays();
+            hideFeedback();
+        });
+
+        // Remover feriado
+        window.removeHoliday = function(index) {
+            holidaysArray.splice(index, 1);
+            renderHolidays();
+        }
+
+        // Feedback
+        function showFeedback(message, type) {
+            feedbackMessage.className = `flex-1 rounded-xl p-4 text-sm font-medium flex items-center gap-3 w-full md:w-auto animate-fade-in ${
+                type === 'success' 
+                    ? 'bg-green-50 text-solides-green border border-green-200' 
+                    : 'bg-red-50 text-solides-red border border-red-200'
+            }`;
+            
+            const icon = type === 'success' ? 'ph-fill ph-check-circle' : 'ph-fill ph-warning-circle';
+            feedbackMessage.innerHTML = `<i class="${icon} text-xl"></i> <span>${message}</span>`;
+            feedbackMessage.style.display = 'flex';
+        }
+
+        function hideFeedback() {
+            feedbackMessage.style.display = 'none';
+        }
+
+        // Submit API
+        btnSubmit.addEventListener('click', async () => {
+            hideFeedback();
+
+            const authToken = document.getElementById('authToken').value.trim();
+            const name = document.getElementById('calName').value.trim();
+            const description = document.getElementById('calDescription').value.trim();
+            const year = parseInt(document.getElementById('calYear').value, 10);
+            const importFixed = document.getElementById('importFixed').checked;
+
+            if (!authToken) return showFeedback('O Token de Autorização é obrigatório.', 'error');
+            if (!name) return showFeedback('O Nome do calendário é obrigatório.', 'error');
+            if (!year) return showFeedback('O Ano do calendário é obrigatório.', 'error');
+            if (holidaysArray.length === 0) return showFeedback('Adicione pelo menos um feriado à lista.', 'error');
+
+            const payload = {
+                name: name,
+                description: description || name,
+                year: year,
+                holidays: holidaysArray
+            };
+
+            // URL da API Tangerino continua inalterada
+            const apiUrl = `https://employer.tangerino.com.br/holiday-calendar/?importBrazilianFixedHolidays=${importFixed}`;
+
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const btnIcon = document.getElementById('btnIcon');
+
+            btnText.innerText = 'Enviando...';
+            btnSpinner.style.display = 'block';
+            btnIcon.style.display = 'none';
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add('opacity-80', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    showFeedback('Calendário criado com sucesso na Sólides!', 'success');
+                } else {
+                    const errorData = await response.json().catch(() => null);
+                    const errorMsg = errorData ? JSON.stringify(errorData) : `Erro HTTP: ${response.status}`;
+                    showFeedback(`Falha ao criar calendário. Detalhes: ${errorMsg}`, 'error');
+                }
+            } catch (error) {
+                showFeedback(`Erro de conexão ou bloqueio de CORS. Verifique o console.`, 'error');
+            } finally {
+                btnText.innerText = 'Criar Calendário na API';
+                btnSpinner.style.display = 'none';
+                btnIcon.style.display = 'block';
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-80', 'cursor-not-allowed');
+            }
+        });
+
+        renderHolidays();
+    </script>
+</body>
+</html>
